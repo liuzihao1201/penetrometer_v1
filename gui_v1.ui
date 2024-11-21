@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1382</width>
+    <width>955</width>
     <height>910</height>
    </rect>
   </property>
@@ -189,9 +189,9 @@
   <widget class="QLabel" name="label_message">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>120</y>
-     <width>791</width>
+     <x>10</x>
+     <y>820</y>
+     <width>151</width>
      <height>61</height>
     </rect>
    </property>
@@ -419,6 +419,93 @@ background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置数据</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_folder_penetration_motor">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>311</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>文件地址</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_select_folder_penetration_motor">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>选择文件夹</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_file_name_penetration_motor_">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>140</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>01</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>140</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>文件名称</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_save_data_penetration_motor">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>140</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>保存当前图表</string>
     </property>
    </widget>
   </widget>
@@ -709,7 +796,7 @@ background-color: rgb(255, 255, 127);</string>
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_folder">
+   <widget class="QLabel" name="label_folder_cut_motor">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -737,9 +824,9 @@ background-color: rgb(255, 255, 127);</string>
   <widget class="QLabel" name="label_message_cut_motor">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>810</y>
-     <width>301</width>
+     <x>10</x>
+     <y>750</y>
+     <width>331</width>
      <height>61</height>
     </rect>
    </property>
@@ -761,9 +848,9 @@ background-color: rgb(255, 255, 127);</string>
   <widget class="QLabel" name="label_message_penetration_motor">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>740</y>
-     <width>301</width>
+     <x>10</x>
+     <y>680</y>
+     <width>331</width>
      <height>61</height>
     </rect>
    </property>
@@ -785,8 +872,8 @@ background-color: rgb(255, 255, 127);</string>
   <widget class="QLabel" name="label_message_proximity_switch">
    <property name="geometry">
     <rect>
-     <x>1220</x>
-     <y>120</y>
+     <x>170</x>
+     <y>820</y>
      <width>171</width>
      <height>61</height>
     </rect>
@@ -809,20 +896,20 @@ background-color: rgb(255, 255, 127);</string>
   <widget class="QChartView" name="QChartview_penetration_motor">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>350</x>
      <y>20</y>
-     <width>911</width>
-     <height>31</height>
+     <width>581</width>
+     <height>441</height>
     </rect>
    </property>
   </widget>
   <widget class="QChartView" name="QChartview_cut_motor">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>190</y>
-     <width>911</width>
-     <height>651</height>
+     <x>350</x>
+     <y>470</y>
+     <width>581</width>
+     <height>411</height>
     </rect>
    </property>
   </widget>

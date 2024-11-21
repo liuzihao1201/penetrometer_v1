@@ -675,7 +675,7 @@ class MainWindow(QMainWindow):
             # 如果用户选择了文件夹（没有点击取消）
             if folder_path:
                 # 更新label显示
-                self.ui.label_folder.setText(folder_path)
+                self.ui.label_folder_cut_motor.setText(folder_path)
                 
         except Exception as e:
             self.ui.label_message.setText(f"选择文件夹失败: {str(e)}")
@@ -697,7 +697,7 @@ class MainWindow(QMainWindow):
                 return
             
             # 获取保存路径
-            save_folder = self.ui.label_folder.text()
+            save_folder = self.ui.label_folder_cut_motor.text()
             if not save_folder or not os.path.exists(save_folder):
                 self.ui.label_message.setText("请先选择有效的保存路径")
                 return
