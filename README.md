@@ -12,6 +12,8 @@
 - 接近开关状态监控
 - 多线程处理确保UI响应性
 - 自动串口检测和配置
+- 文件夹选择功能，支持选择保存数据的路径
+- 数据保存功能，将图表数据保存为Excel文件，包含切割电机位置、编码器数据和时间戳
 
 ## 文件结构
 
@@ -49,6 +51,7 @@ pip install -r requirements.txt
 pip install minimalmodbus
 pip install PySide6
 pip install pyserial
+pip install pandas openpyxl  # 添加对pandas和openpyxl的依赖
 ```
 
 ## 使用说明
@@ -80,6 +83,10 @@ python penetrometer_v1_1.py
    - 实时图表显示
    - 编码器数据记录
    - 状态信息反馈
+
+5. **数据保存**
+   - 点击"选择文件夹"按钮选择保存路径
+   - 输入文件名并点击"保存数据"按钮，将数据保存为Excel文件
 
 ### 注意事项
 
@@ -142,6 +149,11 @@ python penetrometer_v1_1.py
 - GitHub Issues：[项目地址]
 
 ## 更新日志
+
+### v1.2
+- 添加文件夹选择功能，支持选择保存数据的路径
+- 添加数据保存功能，将图表数据保存为Excel文件，包含切割电机位置、编码器数据和时间戳
+- 优化用户界面和交互体验
 
 ### v1.1
 - 添加实时数据显示功能
