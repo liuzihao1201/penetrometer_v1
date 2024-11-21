@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsScene
+from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QFileDialog
 from gui_v1 import Ui_Form
 from cut_motor_control.communication import CutMotorCommunication
 from cut_motor_control.controller import CutMotorController
@@ -12,32 +12,52 @@ import time
 from PySide6.QtCore import QTimer, Qt, QMargins
 from PySide6.QtCharts import QChart, QChartView, QScatterSeries, QValueAxis
 from PySide6.QtCore import QPointF, QRectF
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QColor
+import pandas as pd
+from datetime import datetime
+import os
 
 class MainWindow(QMainWindow):
+    """
+    主窗口类，负责管理GUI界面和所有控制功能
+    
+    属性:
+        ui: GUI界面实例
+        motor_controller: 切割电机控制器
+        penetration_motor_controller: 贯入电机控制器
+        proximity_controller: 接近开关控制器
+        data_points: 存储图表数据点的列表
+        cut_motor_series: 切割电机数据图表系列
+        cut_motor_chart: 切割电机数据图表
+    """
     def __init__(self):
+        """初始化主窗口及其组件"""
         super(MainWindow, self).__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
 
-        # 初始化切割电机的图表和数据系列
-        self.cut_motor_series = QScatterSeries()
-        self.cut_motor_series.setMarkerSize(8)  # 增大点的大小使其更容易看见
-        self.cut_motor_series.setName("编码器数据")
+        # 初始化图表组件
+        self.cut_motor_series = QScatterSeries()  # 创建散点图系列
+        self.cut_motor_series.setName("编码器数据")  # 设置图表系列名称
         
-        # 创建图表
+        # 配置散点样式
+        self.cut_motor_series.setMarkerSize(10)  # 设置点的大小
+        self.cut_motor_series.setColor(QColor(0, 114, 189))  # 设置点的颜色
+        
+        # 创建并配置图表
         self.cut_motor_chart = QChart()
         self.cut_motor_chart.addSeries(self.cut_motor_series)
         self.cut_motor_chart.setTitle("切割电机位置")
-        self.cut_motor_chart.setAnimationOptions(QChart.SeriesAnimations)  # 添加动画效果
+        self.cut_motor_chart.setAnimationOptions(QChart.SeriesAnimations)
         
-        # 设置坐标轴
+        # 配置X轴
         x_axis = QValueAxis()
         x_axis.setTitleText("编码器脉冲")
         x_axis.setRange(-50000, 50000)
         x_axis.setTickCount(11)
         x_axis.setLabelFormat("%d")  # 使用整数格式
         
+        # 配置Y轴
         y_axis = QValueAxis()
         y_axis.setTitleText("扭矩(N.m)")
         y_axis.setRange(0, 100)
@@ -115,6 +135,10 @@ class MainWindow(QMainWindow):
 
         # 填充串口列表
         self.populate_serial_ports()
+
+        # 连接文件夹选择和数据保存按钮
+        self.ui.pushButton_select_folder_cut_motor.clicked.connect(self.select_folder_cut_motor)
+        self.ui.pushButton_save_data_cut_motor.clicked.connect(self.save_data_cut_motor)
 
     def closeEvent(self, event):
         """界面关闭时自动关闭已连接的串口"""
@@ -278,7 +302,7 @@ class MainWindow(QMainWindow):
         try:
             if self.motor_controller:
                 self.motor_controller.set_servo_mode(2)  # 设置伺服模式为2
-                speed_value = float(self.ui.lineEdit_speed_cut_motor.text())  # 获取速度值
+                speed_value = float(self.ui.lineEdit_speed_cut_motor.text())  # 获取度值
                 distance_value = float(self.ui.lineEdit_distance_cut_motor.text())  # 获取距离值
 
                 speed_rpm = speed_value * 850 / 6  # 计算速度RPM
@@ -390,7 +414,7 @@ class MainWindow(QMainWindow):
                 speed_rpm = speed_value * 1020  # 计算速度RPM
 
                 self.penetration_motor_controller.set_speed(speed_rpm)  # 设置电机速度
-                self.ui.label_message.setText("贯入电机已设置为持续上升")  # 显示成功信息
+                self.ui.label_message.setText("贯入电机已置为持续上升")  # 显示成功信息
 
                 # 监控接近开关状态
                 while True:
@@ -525,25 +549,51 @@ class MainWindow(QMainWindow):
             self.ui.label_message.setText(f"无法重置贯入电机数据: {str(e)}")
 
     def reset_data_cut_motor(self):
-        """重置切割电机的数据"""
+        """
+        重置切割电机的数据和图表显示
+        
+        功能:
+            - 重置电机控制器数据
+            - 重新创建散点图系列
+            - 清空数据点
+            - 重置坐标轴范围
+            - 停止数据采集定时器
+        """
         try:
-            if self.motor_controller:  # Changed back to motor_controller
-                self.motor_controller.reset_data()  # 重置电机控制器数据
+            if self.motor_controller:
+                self.motor_controller.reset_data()
             
-            self.data_points = []  # 清空数据点列表
-            self.cut_motor_series.clear()  # 清空图表系列
-            self.start_time = time.time()  # 重置开始时间
+            # 重新创建散点图系列
+            self.cut_motor_series = QScatterSeries()
+            self.cut_motor_series.setName("编码器数据")
             
-            # 重置图表轴范围
+            # 配置散点样式
+            self.cut_motor_series.setMarkerSize(10)
+            self.cut_motor_series.setColor(QColor(0, 114, 189))
+            
+            # 更新图表配置
+            self.cut_motor_chart.removeAllSeries()
+            self.cut_motor_chart.addSeries(self.cut_motor_series)
+            
+            # 重新连接坐标轴
+            self.cut_motor_chart.addAxis(self.cut_motor_chart.axisX(), Qt.AlignBottom)
+            self.cut_motor_chart.addAxis(self.cut_motor_chart.axisY(), Qt.AlignLeft)
+            self.cut_motor_series.attachAxis(self.cut_motor_chart.axisX())
+            self.cut_motor_series.attachAxis(self.cut_motor_chart.axisY())
+            
+            # 重置数据存储
+            self.data_points = []
+            self.start_time = time.time()
+            
+            # 重置坐标轴范围
             self.cut_motor_chart.axisX().setRange(-50000, 50000)
             self.cut_motor_chart.axisY().setRange(-50000, 50000)
             
             self.ui.label_message_cut_motor.setText("切割电机数据已重置")
             
-            # 停止定时器
+            # 停止并清理定时器
             if self.data_timer.isActive():
                 self.data_timer.stop()
-                # 断开所有连接
                 try:
                     self.data_timer.timeout.disconnect()
                 except:
@@ -558,43 +608,126 @@ class MainWindow(QMainWindow):
             self.data_timer.start(100)  # 每100毫秒更新一次数据
 
     def update_cut_motor_plot(self):
-        """更新切割电机编码器数据的绘图"""
+        """
+        更新切割电机编码器数据的实时散点图显示
+        
+        功能:
+            - 获取最新的编码器数据
+            - 更新数据点集合（包含位置、编码器数据和时间戳）
+            - 重绘散点图
+            - 动态调整坐标轴范围
+        """
         try:
             encoder_pulses = self.get_encoder_data()
             if encoder_pulses is not None:
-                # 使用固定的 y 值 200
+                # 计算数据点坐标
                 x = float(encoder_pulses)
-                y = float(encoder_pulses * 1.5)
+                y = float(encoder_pulses * 1.5)  # 使用比例因子计算Y值
+                current_time = (time.time() - self.start_time) * 1000  # 计算当前时间戳（毫秒）
                 
-                # 添加新的数据点
-                self.data_points.append((x, y))
+                # 更新数据集合，现在每个点存储为三元组 (x, y, timestamp)
+                self.data_points.append((x, y, current_time))
                 
-                # 清除现有数据点
+                # 更新散点图（只显示x和y）
                 self.cut_motor_series.clear()
-                
-                # 添加所有数据点
-                for point_x, point_y in self.data_points:
+                for point_x, point_y, _ in self.data_points:
                     self.cut_motor_series.append(point_x, point_y)
                 
-                # 动态调整 X 和 Y 轴范围
+                # 动态调整坐标轴范围
                 if self.data_points:
-                    # X 轴范围调整
+                    # 计算并设置X轴范围
                     x_values = [p[0] for p in self.data_points]
-                    x_min = min(x_values)
-                    x_max = max(x_values)
+                    x_min, x_max = min(x_values), max(x_values)
                     x_margin = (x_max - x_min) * 0.1 if x_max != x_min else 1000
                     self.cut_motor_chart.axisX().setRange(x_min - x_margin, x_max + x_margin)
                     
-                    # Y 轴范围调整
+                    # 计算并设置Y轴范围
                     y_values = [p[1] for p in self.data_points]
-                    y_min = min(y_values)
-                    y_max = max(y_values)
+                    y_min, y_max = min(y_values), max(y_values)
                     y_margin = (y_max - y_min) * 0.1 if y_max != y_min else 1000
                     self.cut_motor_chart.axisY().setRange(y_min - y_margin, y_max + y_margin)
-                
+            
         except Exception as e:
             print(f"更新图表时出错: {str(e)}")
             self.ui.label_message_cut_motor.setText(f"更新图表失败: {str(e)}")
+
+    def select_folder_cut_motor(self):
+        """
+        打开文件夹选择对话框，选择数据保存路径
+        
+        功能：
+            - 打开文件选择窗口
+            - 默认打开程序根目录
+            - 将选择的路径显示在label中
+        """
+        try:
+            # 获取程序根目录
+            root_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # 打开文件夹选择对话框
+            folder_path = QFileDialog.getExistingDirectory(
+                self,
+                "选择保存文件夹",
+                root_dir,  # 默认打开根目录
+                QFileDialog.ShowDirsOnly
+            )
+            
+            # 如果用户选择了文件夹（没有点击取消）
+            if folder_path:
+                # 更新label显示
+                self.ui.label_folder.setText(folder_path)
+                
+        except Exception as e:
+            self.ui.label_message.setText(f"选择文件夹失败: {str(e)}")
+
+    def save_data_cut_motor(self):
+        """
+        保存切割电机图表数据到Excel文件
+        
+        功能：
+            - 获取图表中所有数据点
+            - 包含位置、编码器数据和每个点的实际时间戳
+            - 保存为xlsx格式
+            - 文件名为"当前时间+用户输入名称"
+        """
+        try:
+            # 检查是否有数据
+            if not self.data_points:
+                self.ui.label_message.setText("没有数据可保存")
+                return
+            
+            # 获取保存路径
+            save_folder = self.ui.label_folder.text()
+            if not save_folder or not os.path.exists(save_folder):
+                self.ui.label_message.setText("请先选择有效的保存路径")
+                return
+            
+            # 获取用户输入的文件名
+            user_filename = self.ui.lineEdit_file_name_cut_motor.text()
+            if not user_filename:
+                self.ui.label_message.setText("请输入文件名")
+                return
+            
+            # 生成完整的文件名（当前时间+用户输入）
+            current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{current_time}_{user_filename}.xlsx"
+            full_path = os.path.join(save_folder, filename)
+            
+            # 准备数据，现在使用存储的时间戳
+            data = {
+                '切割电机位置': [point[0] for point in self.data_points],
+                '编码器数据': [point[1] for point in self.data_points],
+                '时间戳(ms)': [point[2] for point in self.data_points]  # 使用存储的时间戳
+            }
+            
+            # 创建DataFrame并保存
+            df = pd.DataFrame(data)
+            df.to_excel(full_path, index=False)
+            
+            self.ui.label_message.setText(f"数据已保存至: {filename}")
+            
+        except Exception as e:
+            self.ui.label_message.setText(f"保存数据失败: {str(e)}")
 
 def main():
     app = QApplication([])

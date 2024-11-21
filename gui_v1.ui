@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1334</width>
-    <height>859</height>
+    <width>1382</width>
+    <height>910</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -396,6 +396,10 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 0);
+background-color: rgb(255, 255, 127);</string>
+    </property>
     <property name="text">
      <string>停止</string>
     </property>
@@ -410,7 +414,8 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 85, 127);</string>
+     <string notr="true">color: rgb(255, 0, 0);
+background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置数据</string>
@@ -433,10 +438,10 @@
   <widget class="QGroupBox" name="groupBox_cut_motor">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>290</y>
-     <width>191</width>
-     <height>201</height>
+     <x>10</x>
+     <y>500</y>
+     <width>331</width>
+     <height>171</height>
     </rect>
    </property>
    <property name="title">
@@ -447,7 +452,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>81</width>
+      <width>41</width>
       <height>23</height>
      </rect>
     </property>
@@ -558,8 +563,8 @@
    <widget class="QPushButton" name="pushButton_clockwise_sustain_cut_motor">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>110</y>
+      <x>240</x>
+      <y>50</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -571,8 +576,8 @@
    <widget class="QPushButton" name="pushButton_anticlockwise_sustain_cut_motor">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>110</y>
+      <x>240</x>
+      <y>80</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -584,11 +589,15 @@
    <widget class="QPushButton" name="pushButton_stop_cut_motor">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>60</x>
       <y>20</y>
-      <width>81</width>
+      <width>41</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 0);
+background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>停止</string>
@@ -597,9 +606,9 @@
    <widget class="QPushButton" name="pushButton_get_data_cut_motor">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>140</y>
-      <width>81</width>
+      <x>110</x>
+      <y>20</y>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
@@ -610,9 +619,9 @@
    <widget class="QPushButton" name="pushButton_stop_data_cut_motor">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>140</y>
-      <width>81</width>
+      <x>190</x>
+      <y>20</y>
+      <width>61</width>
       <height>23</height>
      </rect>
     </property>
@@ -623,25 +632,113 @@
    <widget class="QPushButton" name="pushButton_reset_data_cut_motor">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>170</y>
-      <width>81</width>
+      <x>260</x>
+      <y>20</y>
+      <width>61</width>
       <height>23</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 85, 127);</string>
+     <string notr="true">color: rgb(255, 0, 0);
+background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置数据</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_file_name_cut_motor">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>140</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>01</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_select_folder_cut_motor">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>选择文件夹</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_save_data_cut_motor">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>140</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>保存当前图表</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>140</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>文件名称</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_folder">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>311</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>文件地址</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
   </widget>
   <widget class="QLabel" name="label_message_cut_motor">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>570</y>
+     <x>20</x>
+     <y>810</y>
      <width>301</width>
      <height>61</height>
     </rect>
@@ -664,8 +761,8 @@
   <widget class="QLabel" name="label_message_penetration_motor">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>500</y>
+     <x>20</x>
+     <y>740</y>
      <width>301</width>
      <height>61</height>
     </rect>
@@ -688,8 +785,8 @@
   <widget class="QLabel" name="label_message_proximity_switch">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>640</y>
+     <x>1220</x>
+     <y>120</y>
      <width>171</width>
      <height>61</height>
     </rect>
