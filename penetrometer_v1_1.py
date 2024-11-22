@@ -122,6 +122,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_reset_penetration_motor.clicked.connect(self.reset_penetration_motor)  # 重置贯入电机
         self.ui.pushButton_reset_data_penetration_motor.clicked.connect(self.reset_data_penetration_motor)
         self.ui.pushButton_reset_data_cut_motor.clicked.connect(self.reset_data_cut_motor)
+        self.ui.pushButton_reset_figure_cut_motor.clicked.connect(self.reset_figure_cut_motor)
 
         # 连接刷新按钮点击事件到刷新方法
         self.ui.pushButton_refresh_com.clicked.connect(self.refresh_serial_ports)  # 刷新串口信息
@@ -141,7 +142,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_save_data_cut_motor.clicked.connect(self.save_data_cut_motor)
 
     def closeEvent(self, event):
-        """界面关闭时自动关闭已连接的串口"""
+        """界面关闭时动关闭已连接的串口"""
         self.close_motor_and_penetration_connection()  # 关闭电机和贯入电机串口连接
         self.close_proximity_connection()  # 关闭接近开关串口连接
         event.accept()  # 接受关闭事件
@@ -216,7 +217,7 @@ class MainWindow(QMainWindow):
             try:
                 self.proximity_comm.instrument.serial.close()  # 关闭串口连接
                 self.proximity_comm = None  # 清空通信对象
-                self.proximity_controller = None  # 清空控制器对象
+                self.proximity_controller = None  # 清控制器对象
                 self.ui.label_message.setText("接近开关串口连接已断开")  # 显示断开信息
             except Exception as e:
                 self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误信息
@@ -285,8 +286,6 @@ class MainWindow(QMainWindow):
                 self.motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
                 self.ui.label_message.setText("电机已设置为顺时针旋转到指定距离")  # 显示成功信息
 
-                # 重置数据并开始绘图
-                self.reset_data_cut_motor()
                 if not self.data_timer.isActive():
                     self.data_timer.timeout.connect(self.update_cut_motor_plot)
                     self.data_timer.start(100)
@@ -311,6 +310,10 @@ class MainWindow(QMainWindow):
 
                 self.motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 置位置控制
                 self.ui.label_message.setText("电机已设置为逆针旋转到指定距离")  # 显示成功信息
+
+                if not self.data_timer.isActive():
+                    self.data_timer.timeout.connect(self.update_cut_motor_plot)
+                    self.data_timer.start(100)
             else:
                 self.ui.label_message.setText("电机控制器未连接")  # 显示未连接信息
         except ValueError as e:
@@ -550,54 +553,16 @@ class MainWindow(QMainWindow):
 
     def reset_data_cut_motor(self):
         """
-        重置切割电机的数据和图表显示
+        重置切割电机的数据
         
         功能:
             - 重置电机控制器数据
-            - 重新创建散点图系列
-            - 清空数据点
-            - 重置坐标轴范围
-            - 停止数据采集定时器
         """
         try:
             if self.motor_controller:
-                self.motor_controller.reset_data()
+                self.motor_controller.reset_data()  # 发送重置数据的命令
             
-            # 重新创建散点图系列
-            self.cut_motor_series = QScatterSeries()
-            self.cut_motor_series.setName("编码器数据")
-            
-            # 配置散点样式
-            self.cut_motor_series.setMarkerSize(10)
-            self.cut_motor_series.setColor(QColor(0, 114, 189))
-            
-            # 更新图表配置
-            self.cut_motor_chart.removeAllSeries()
-            self.cut_motor_chart.addSeries(self.cut_motor_series)
-            
-            # 重新连接坐标轴
-            self.cut_motor_chart.addAxis(self.cut_motor_chart.axisX(), Qt.AlignBottom)
-            self.cut_motor_chart.addAxis(self.cut_motor_chart.axisY(), Qt.AlignLeft)
-            self.cut_motor_series.attachAxis(self.cut_motor_chart.axisX())
-            self.cut_motor_series.attachAxis(self.cut_motor_chart.axisY())
-            
-            # 重置数据存储
-            self.data_points = []
-            self.start_time = time.time()
-            
-            # 重置坐标轴范围
-            self.cut_motor_chart.axisX().setRange(-50000, 50000)
-            self.cut_motor_chart.axisY().setRange(-50000, 50000)
-            
-            self.ui.label_message_cut_motor.setText("切割电机数据已重置")
-            
-            # 停止并清理定时器
-            if self.data_timer.isActive():
-                self.data_timer.stop()
-                try:
-                    self.data_timer.timeout.disconnect()
-                except:
-                    pass
+            self.ui.label_message_cut_motor.setText("切割电机数据已重置")  # 更新状态信息
         except Exception as e:
             self.ui.label_message_cut_motor.setText(f"重置切割电机数据失败: {str(e)}")
 
@@ -629,7 +594,7 @@ class MainWindow(QMainWindow):
                 self.data_points.append((x, y, current_time))
                 
                 # 更新散点图（只显示x和y）
-                self.cut_motor_series.clear()
+                self.cut_motor_series.clear()  # 确保在添加新点之前清空系列
                 for point_x, point_y, _ in self.data_points:
                     self.cut_motor_series.append(point_x, point_y)
                 
@@ -708,9 +673,9 @@ class MainWindow(QMainWindow):
                 self.ui.label_message.setText("请输入文件名")
                 return
             
-            # 生成完整的文件名（当前时间+用户输入）
+            # 生成完整的文件名（cut_motor_当前时间+用户输入）
             current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{current_time}_{user_filename}.xlsx"
+            filename = f"cut_motor_{current_time}_{user_filename}.xlsx"
             full_path = os.path.join(save_folder, filename)
             
             # 准备数据，现在使用存储的时间戳
@@ -728,6 +693,14 @@ class MainWindow(QMainWindow):
             
         except Exception as e:
             self.ui.label_message.setText(f"保存数据失败: {str(e)}")
+
+    def reset_figure_cut_motor(self):
+        """清空切割电机图表"""
+        self.cut_motor_series.clear()  # 清空散点图系列
+        self.data_points.clear()  # 清空数据点列表
+        self.cut_motor_chart.axisX().setRange(0, 1)  # 重置X轴范围
+        self.cut_motor_chart.axisY().setRange(0, 1)  # 重置Y轴范围
+        self.ui.label_message_cut_motor.setText("图表已重置")  # 更新状态信息
 
 def main():
     app = QApplication([])

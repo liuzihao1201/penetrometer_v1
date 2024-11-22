@@ -82,11 +82,19 @@ class PenetrationMotorController:
         } 
 
     def get_encoder_pulses(self):
-        """获取编码器输入脉冲数量"""
+        """获取编码器输入脉冲数量，支持负数"""
         # 使用read_registers一次性读取高低半字
         high_low_words = self.comm.read_registers(self.REGISTERS['encoder_high'], 2, functioncode=3)
         high_word, low_word = high_low_words
-        return (high_word << 16) | low_word
+        
+        # 将高低字合并为一个32位整数
+        pulses = (high_word << 16) | low_word
+        
+        # 检查是否为负数（如果高字的最高位为1，则表示负数）
+        if high_word & 0x8000:  # 0x8000 是 16 位数的最高位
+            pulses -= (1 << 32)  # 将其转换为负数（补码形式）
+        
+        return pulses
 
     def reset_data(self):
         """重置贯入电机数据"""
