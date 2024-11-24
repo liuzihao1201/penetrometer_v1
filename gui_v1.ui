@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>955</width>
+    <width>1380</width>
     <height>910</height>
    </rect>
   </property>
@@ -190,9 +190,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>820</y>
-     <width>151</width>
-     <height>61</height>
+     <y>770</y>
+     <width>331</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -859,9 +859,9 @@ background-color: rgb(255, 255, 127);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>750</y>
+     <y>710</y>
      <width>331</width>
-     <height>61</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -883,9 +883,9 @@ background-color: rgb(255, 255, 127);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>680</y>
+     <y>650</y>
      <width>331</width>
-     <height>61</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -906,10 +906,10 @@ background-color: rgb(255, 255, 127);</string>
   <widget class="QLabel" name="label_message_proximity_switch">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>820</y>
-     <width>171</width>
-     <height>61</height>
+     <x>10</x>
+     <y>830</y>
+     <width>331</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -918,7 +918,7 @@ background-color: rgb(255, 255, 127);</string>
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 127);</string>
+    <string notr="true">background-color: rgb(170, 255, 255);</string>
    </property>
    <property name="text">
     <string>接近开关位置</string>
@@ -932,7 +932,7 @@ background-color: rgb(255, 255, 127);</string>
     <rect>
      <x>350</x>
      <y>20</y>
-     <width>581</width>
+     <width>921</width>
      <height>441</height>
     </rect>
    </property>
@@ -942,7 +942,7 @@ background-color: rgb(255, 255, 127);</string>
     <rect>
      <x>350</x>
      <y>470</y>
-     <width>581</width>
+     <width>921</width>
      <height>411</height>
     </rect>
    </property>
