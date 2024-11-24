@@ -8,7 +8,7 @@ class PenetrationMotorCommunication:
         
     def setup_communication(self):
         """设置通信参数"""
-        self.instrument.serial.baudrate = 9600
+        self.instrument.serial.baudrate = 19200
         self.instrument.serial.bytesize = 8
         self.instrument.serial.parity = serial.PARITY_EVEN
         self.instrument.serial.stopbits = 1

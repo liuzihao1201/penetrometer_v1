@@ -33,6 +33,10 @@ project/
 │   ├── communication.py     # 接近开关通信
 │   └── control.py          # 接近开关控制逻辑
 │
+├── sensor_2/
+│   ├── communication.py     # 传感器通信
+│   └── controller.py        # 传感器控制逻辑
+│
 ├── penetrometer_v1_1.py    # 主程序入口
 └── gui_v1.py              # GUI界面定义
 ```
