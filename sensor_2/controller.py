@@ -14,7 +14,7 @@ class SensorController:
             pulling_pressure = struct.unpack('>f', struct.pack('>HH', data[0], data[1]))[0]
             # 解析后两个寄存器为float型扭矩
             torque = struct.unpack('>f', struct.pack('>HH', data[2], data[3]))[0]
-            return round(pulling_pressure, 8), round(torque, 8)
+            return round(pulling_pressure, 2), round(torque, 2)
         except Exception as e:
             print(f"无法监控传感器数据: {str(e)}")
             return None, None
