@@ -14,7 +14,7 @@ import time
 from PySide6.QtCore import QTimer, Qt, QMargins
 from PySide6.QtCharts import QChart, QChartView, QScatterSeries, QValueAxis
 from PySide6.QtCore import QPointF, QRectF
-from PySide6.QtGui import QPainter, QColor
+from PySide6.QtGui import QPainter, QColor, QIcon
 import pandas as pd
 from datetime import datetime
 import os
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
 
         # 用于记录时间
         self.start_time = time.time()
-        self.cut_motor_data_points = []  # 存储数据点
+        self.cut_motor_data_points = []  # 存储数据��
 
         # 初始化通信控制器对象
         self.cut_motor_comm = None  # 电机通信对象
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
         # 连接按钮点击事件到相应的方法
         self.ui.pushButton_open_com_motor.clicked.connect(self.open_motor_and_penetration_connection)  # 打开电机和贯入电机串口连接
         self.ui.pushButton_close_com_motor.clicked.connect(self.close_motor_and_penetration_connection)  # 关闭电机和贯入电机串口连接
-        self.ui.pushButton_open_com_proximity_switch.clicked.connect(self.open_proximity_connection)  # 打开接近开关串口连接
+        self.ui.pushButton_open_com_proximity_switch.clicked.connect(self.open_proximity_connection)  # 打开接近开���串口连接
         self.ui.pushButton_close_com_proximity_switch.clicked.connect(self.close_proximity_connection)  # 关闭接近开关串口连接
         self.ui.pushButton_clockwise_distance_cut_motor.clicked.connect(self.clockwise_distance_cut_motor)  # 顺时针旋转到指定距离
         self.ui.pushButton_anticlockwise_distance_cut_motor.clicked.connect(self.anticlockwise_distance_cut_motor)  # 逆时针旋转到指定距离
@@ -131,6 +131,8 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_open_com_sensor_2.clicked.connect(self.open_sensor_connection)  # 打开传感器串口连接
         self.ui.pushButton_close_com_sensor_2.clicked.connect(self.close_sensor_connection)  # 关闭传感器串口连接
         self.ui.pushButton_reset_figure_penetration_motor.clicked.connect(self.reset_figure_penetration_motor)
+        self.ui.pushButton_reset_data_penetration_sensor.clicked.connect(self.reset_data_penetration_sensor)
+        self.ui.pushButton_reset_data_cut_sensor.clicked.connect(self.reset_data_cut_sensor)
 
         # 连接刷新按钮点击事件到刷新方法
         self.ui.pushButton_refresh_com.clicked.connect(self.refresh_serial_ports)  # 刷新串口信息
@@ -290,7 +292,7 @@ class MainWindow(QMainWindow):
             self.ui.label_message.setText(f"无法连接到 {selected_port}: {str(e)}")  # 显示错误信息
 
     def close_proximity_connection(self):
-        """关闭接近开关的串口连接"""
+        """关闭接近开关的串口���接"""
         if self.proximity_comm:
             try:
                 self.proximity_comm.instrument.serial.close()  # 关闭串口连接
@@ -981,10 +983,34 @@ class MainWindow(QMainWindow):
             self.ui.label_message.setText(f"无法获取传感器数据: {str(e)}")  # 显示错误信息
             return None, None
 
+    def reset_data_penetration_sensor(self):
+        """重置传感器的拉压力数据"""
+        try:
+            if self.sensor_controller:
+                self.sensor_controller.reset_pulling_pressure()
+                self.ui.label_message.setText("传感器拉压力数据已重置")
+            else:
+                self.ui.label_message.setText("传感器控制器未连接")
+        except Exception as e:
+            self.ui.label_message.setText(f"无法重置传感器拉压力数据: {str(e)}")
+
+    def reset_data_cut_sensor(self):
+        """重置传感器的扭矩数据"""
+        try:
+            if self.sensor_controller:
+                self.sensor_controller.reset_torque()
+                self.ui.label_message.setText("传感器扭矩数据已重置")
+            else:
+                self.ui.label_message.setText("传感器控制器未连接")
+        except Exception as e:
+            self.ui.label_message.setText(f"无法重置传感器扭矩数据: {str(e)}")
+
 def main():
     app = QApplication([])
     window = MainWindow()
     window.show()
+    window.setWindowTitle("TTL-V1.0")
+    window.setWindowIcon(QIcon('jlu.png'))
     app.exec()
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ class SensorController:
     def reset_pulling_pressure(self):
         """重置拉压力"""
         try:
-            self.comm.write_registers(0x0320, [0x0000, 0x0001], functioncode=16)
+            self.comm.write_registers(0x0320, [0x0000, 0x0001])
             print("拉压力已重置")
         except Exception as e:
             print(f"无法重置拉压力: {str(e)}")
@@ -30,7 +30,7 @@ class SensorController:
     def reset_torque(self):
         """重置扭矩"""
         try:
-            self.comm.write_registers(0x0320, [0x0000, 0x0002], functioncode=16)
+            self.comm.write_registers(0x0320, [0x0000, 0x0002])
             print("扭矩已重置")
         except Exception as e:
             print(f"无法重置扭矩: {str(e)}")
@@ -38,7 +38,7 @@ class SensorController:
     def reset_all(self):
         """重置所有数据"""
         try:
-            self.comm.write_registers(0x0320, [0x0000, 0x000A], functioncode=16)
+            self.comm.write_registers(0x0320, [0x0000, 0x000A])
             print("所有数据已重置")
         except Exception as e:
             print(f"无法重置所有数据: {str(e)}") 

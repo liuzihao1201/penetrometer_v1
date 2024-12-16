@@ -20,6 +20,6 @@ class SensorCommunication:
         """读取多个寄存器"""
         return self.instrument.read_registers(address, count, functioncode=functioncode)
 
-    def write_registers(self, address, values, functioncode=16):
+    def write_registers(self, address, values):
         """写入多个寄存器"""
-        self.instrument.write_registers(address, values, functioncode=functioncode) 
+        self.instrument.write_registers(address, values)  # 写入多个寄存器
