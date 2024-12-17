@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QFileDialog
-from gui_v1 import Ui_Form
+from gui_v1_english import Ui_Form
 from cut_motor_control.communication import CutMotorCommunication
 from cut_motor_control.controller import CutMotorController
 from proximity_switch.communication import ProximitySwitchCommunication
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
 
         # 初始化图表组件
         self.cut_motor_series = QScatterSeries()  # 创建散点图系列
-        self.cut_motor_series.setName("剪切数据")  # 设置图表系列名称
+        self.cut_motor_series.setName("Cut data points")  # 设置图表系列名称
         
         # 配置散点样式
         self.cut_motor_series.setMarkerSize(10)  # 设置点的大小
@@ -49,19 +49,19 @@ class MainWindow(QMainWindow):
         # 创建并配置图表
         self.cut_motor_chart = QChart()
         self.cut_motor_chart.addSeries(self.cut_motor_series)
-        self.cut_motor_chart.setTitle("剪切")
+        self.cut_motor_chart.setTitle("Cut scatter plot")
         self.cut_motor_chart.setAnimationOptions(QChart.SeriesAnimations)
         
         # 配置X轴
         x_axis = QValueAxis()
-        x_axis.setTitleText("电机编码")
-        x_axis.setRange(-50000, 50000)
+        x_axis.setTitleText("Angle(°)")
+        x_axis.setRange(-30, 30)
         x_axis.setTickCount(11)
-        x_axis.setLabelFormat("%d")  # 使用整数格式
+        x_axis.setLabelFormat("%.1f")  # 显示一位小数
         
         # 配置Y轴
         y_axis = QValueAxis()
-        y_axis.setTitleText("扭矩(N.m)")
+        y_axis.setTitleText("Torque(N.m)")
         y_axis.setRange(0, 100)
         y_axis.setTickCount(11)
         y_axis.setLabelFormat("%.1f")  # 显示一位小数
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
 
         # 初始化图表组件
         self.penetration_motor_series = QScatterSeries()  # 创建散点图系列
-        self.penetration_motor_series.setName("拉压力数据")  # 设置图表系列名称
+        self.penetration_motor_series.setName("Pressure data points")  # 设置图表系列名称
 
         # 配置散点样式
         self.penetration_motor_series.setMarkerSize(10)  # 设置点的大小
@@ -165,19 +165,19 @@ class MainWindow(QMainWindow):
         # 创建并配置图表
         self.penetration_motor_chart = QChart()
         self.penetration_motor_chart.addSeries(self.penetration_motor_series)
-        self.penetration_motor_chart.setTitle("贯入")
+        self.penetration_motor_chart.setTitle("Penetration scatter plot")
         self.penetration_motor_chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # 配置X轴
         x_axis_penetration = QValueAxis()
-        x_axis_penetration.setTitleText("电机编码")
-        x_axis_penetration.setRange(-50000, 50000)  # 根据需要调整范围
+        x_axis_penetration.setTitleText("Distance(mm)")
+        x_axis_penetration.setRange(-30, 30)  # 根据需要调整范围
         x_axis_penetration.setTickCount(11)
         x_axis_penetration.setLabelFormat("%d")  # 使用整数格式
 
         # 配置Y轴
         y_axis_penetration = QValueAxis()
-        y_axis_penetration.setTitleText("拉压力 (N)")
+        y_axis_penetration.setTitleText("Pressure(N)")
         y_axis_penetration.setRange(0, 100)  # 根据需要调整范围
         y_axis_penetration.setTickCount(11)
         y_axis_penetration.setLabelFormat("%.1f")  # 显示一位小数
@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
             while self.proximity_controller:
                 status = self.proximity_controller.get_switch_status()
                 if status is not None:
-                    self.ui.label_message_proximity_switch.setText(f"开关量输入状态: {status}")
+                    self.ui.label_message_proximity_switch.setText(f"IO: {status}")
                 time.sleep(0.1)
         except Exception as e:
             self.ui.label_message_proximity_switch.setText(f"监控失败: {str(e)}")
@@ -693,7 +693,7 @@ class MainWindow(QMainWindow):
             pulling_pressure, torque = self.get_sensor_data()  # 使用相同的方式获取传感器数据
             if encoder_pulses is not None:
                 # 计算数据点坐标
-                x = float(encoder_pulses)
+                x = float(encoder_pulses * 360 / 37400)  # 编码器脉冲作为X轴数据
                 y = float(torque)  # 使用torque值作为Y值
                 current_time = (time.time() - self.start_time) * 1000  # 计算当前时间戳（毫秒）
                 
@@ -751,7 +751,7 @@ class MainWindow(QMainWindow):
             
             if encoder_pulses is not None and pulling_pressure is not None:  # 确保数据有效
                 # 计算数据点坐标
-                x = float(encoder_pulses)  # 编码器脉冲作为X轴数据
+                x = float(encoder_pulses / 544)  # 下降距离（）作为X轴数据
                 y = float(pulling_pressure)  # 拉压力作为Y轴数据
                 # 计算当前时间戳（毫秒）
                 current_time = (time.time() - self.start_time_penetration) * 1000  
@@ -956,7 +956,7 @@ class MainWindow(QMainWindow):
         self.cut_motor_data_points.clear()  # 清空数据点列表
         # self.cut_motor_chart.axisX().setRange(0, 1)  # 重置X轴范围
         # self.cut_motor_chart.axisY().setRange(0, 1)  # 重置Y轴范围
-        self.ui.label_message_cut_motor.setText("图表已重置")  # 更新状态信息
+        self.ui.label_message_cut_motor.setText("Reset figure")  # 更新状态信息
 
     def reset_figure_penetration_motor(self):
         """清空剪切电机图表"""
@@ -964,7 +964,7 @@ class MainWindow(QMainWindow):
         self.penetration_motor_data_points.clear()  # 清空数据点列表
         # self.cut_motor_chart.axisX().setRange(0, 1)  # 重置X轴范围
         # self.cut_motor_chart.axisY().setRange(0, 1)  # 重置Y轴范围
-        self.ui.label_message_penetration_motor.setText("图表已重置")  # 更新状态信息
+        self.ui.label_message_penetration_motor.setText("Reset figure")  # 更新状态信息
 
     def start_getting_sensor_data(self):
         """开始获取传感器数据"""
@@ -977,7 +977,7 @@ class MainWindow(QMainWindow):
         """获取传感器数据并显示"""
         try:
             pulling_pressure, torque = self.sensor_controller.monitor_2_sensor()  # 获取传感器数据
-            self.ui.label_message.setText(f"拉压力: {pulling_pressure}, 扭矩: {torque}")  # 显示传感器数据
+            self.ui.label_message.setText(f"Pressure: {pulling_pressure}, Torque: {torque}")  # 显示传感器数据
             return pulling_pressure, torque
         except Exception as e:
             self.ui.label_message.setText(f"无法获取传感器数据: {str(e)}")  # 显示错误信息
