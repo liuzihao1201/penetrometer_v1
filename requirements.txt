@@ -1,0 +1,5 @@
+minimalmodbus
+PySide6
+pyserial
+pandas
+openpyxl
