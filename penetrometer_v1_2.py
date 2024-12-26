@@ -19,6 +19,20 @@ import pandas as pd
 from datetime import datetime
 import os
 
+class PenetrationMotorThread(QThread):
+    def __init__(self, update_function):
+        super().__init__()
+        self.update_function = update_function
+        self._is_running = True
+
+    def run(self):
+        while self._is_running:
+            self.update_function()  # 调用更新函数
+            time.sleep(0.001)  # 每20毫秒执行一次
+
+    def stop(self):
+        self._is_running = False
+
 class MainWindow(QMainWindow):
     """
     主窗口类，负责管理GUI界面和所有控制功能
@@ -37,6 +51,10 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+
+        # 初始化线程
+        self.penetration_motor_thread = PenetrationMotorThread(self.update_penetration_motor_plot)
+
 
         # 初始化图表组件
         self.cut_motor_series = QLineSeries()  # 创建折线图系列
@@ -90,7 +108,7 @@ class MainWindow(QMainWindow):
         self.start_time = time.time()
         self.cut_motor_data_points = []  # 存储数据点
 
-        # ���始化信控制器对象
+        # 初始化信控制器对象
         self.cut_motor_comm = None  # 电机通信对象
         self.cut_motor_controller = None  # 电机控制器对象
         self.proximity_comm = None  # 接近开关通信对象
@@ -99,18 +117,18 @@ class MainWindow(QMainWindow):
         self.penetration_motor_controller = None  # 贯入电机控制器对象
         self.sensor_comm = None  # 传感器通信对象
 
-        # 数据获取定时器
-        self.data_timer_cut = QTimer(self)
+        # 数获取定时器
+        #self.data_timer_cut = QTimer(self)
         # self.data_timer_cut.timeout.connect(self.get_cut_encoder_data)
-        self.data_timer_cut.timeout.connect(self.update_cut_motor_plot)
+        #self.data_timer_cut.timeout.connect(self.update_cut_motor_plot)
 
-        self.data_timer_penetration = QTimer(self)  # 用于贯入电机
-        self.data_timer_penetration.timeout.connect(self.update_penetration_motor_plot)
+        #self.data_timer_penetration = QTimer(self)  # 用于贯入电机
+        #self.data_timer_penetration.timeout.connect(self.update_penetration_motor_plot)
 
         # 连接按钮点击事件到相应的方法
         self.ui.pushButton_open_com_motor.clicked.connect(self.open_motor_and_penetration_connection)  # 打开电机和贯入电机串口连接
         self.ui.pushButton_close_com_motor.clicked.connect(self.close_motor_and_penetration_connection)  # 关闭电机和贯入电机串口连接
-        self.ui.pushButton_open_com_proximity_switch.clicked.connect(self.open_proximity_connection)  # 打开接近开关串口连接
+        self.ui.pushButton_open_com_proximity_switch.clicked.connect(self.open_proximity_connection)  # 打开接近开关��口连接
         self.ui.pushButton_close_com_proximity_switch.clicked.connect(self.close_proximity_connection)  # 关闭接近开关串口连接
         self.ui.pushButton_clockwise_distance_cut_motor.clicked.connect(self.clockwise_distance_cut_motor)  # 顺时针旋转到指定距离
         self.ui.pushButton_anticlockwise_distance_cut_motor.clicked.connect(self.anticlockwise_distance_cut_motor)  # 逆时针旋转到指定距离
@@ -137,8 +155,12 @@ class MainWindow(QMainWindow):
         # 连接刷新按钮点击事件到刷新方法
         self.ui.pushButton_refresh_com.clicked.connect(self.refresh_serial_ports)  # 刷新串口信息
 
-        # 连接打开所有串口按钮点击事件到相应的方法
+        # 连打开所有串口按钮点击事件到相应的方法
         self.ui.pushButton_open_com_all.clicked.connect(self.open_all_connections)  # 打开所有串口连接
+
+        # 连接取数据按钮点击事件到相的方法
+        self.ui.pushButton_get_data_cut_motor.clicked.connect(self.start_getting_cut_encoder_data)  # 开始获取编码器数据
+        self.ui.pushButton_stop_data_cut_motor.clicked.connect(self.stop_getting_cut_encoder_data)  # 停止获取编码器数据
 
         # 填充串口列表
         self.populate_serial_ports()
@@ -206,7 +228,7 @@ class MainWindow(QMainWindow):
         self.last_plot_time = time.time()  # 记录上次绘图的时间
 
     def closeEvent(self, event):
-        """界面关闭时自动关闭已连接的串口线程"""
+        """界面关闭时动关闭已连接的串口线程"""
         # 关闭电机和贯入电机串口连接
         self.close_motor_and_penetration_connection()  
         # 关闭接近开关串口连接
@@ -221,6 +243,8 @@ class MainWindow(QMainWindow):
 
         # 关闭其他可能的线程（如果有）
         # 例如，如果您有其他线程，可以在这里添加关闭逻辑
+        self.penetration_motor_thread.stop()
+        self.penetration_motor_thread.wait()  # 等待线程安全退出
 
         event.accept()  # 接受关闭事件
 
@@ -253,7 +277,7 @@ class MainWindow(QMainWindow):
 
     def open_cut_motor_connection(self):
         """打开电机的串口连接"""
-        selected_port_info = self.ui.comboBox_motor.currentText()  # 获取选中的串口信息
+        selected_port_info = self.ui.comboBox_motor.currentText()  # 获取选的串口息
         selected_port = selected_port_info.split(' - ')[0]  # 提取串口号
         try:
             self.cut_motor_comm = CutMotorCommunication(selected_port)  # 创建电机通信对象
@@ -269,7 +293,7 @@ class MainWindow(QMainWindow):
                 self.cut_motor_comm.instrument.serial.close()  # 关闭串口连接
                 self.cut_motor_comm = None  # 清空通信对象
                 self.cut_motor_controller = None  # 清空控制器对象
-                self.ui.label_message.setText("电机串口连接已断开")  # 显示断开信息
+                self.ui.label_message.setText("电机串口连接已断开")  # 显示开信息
             except Exception as e:
                 self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误信息
 
@@ -282,7 +306,7 @@ class MainWindow(QMainWindow):
             self.proximity_controller = ProximitySwitchController(self.proximity_comm)  # 创建接近开关控制器对象
             self.ui.label_message.setText(f"成功连接到 {selected_port}")  # 显示成功信息
 
-            # 启动一个线程来监控开关状态
+            # 启动一个线程来监控开状态
             self.proximity_monitor_thread = threading.Thread(target=self.monitor_proximity_switch)
             self.proximity_monitor_thread.start()
         except Exception as e:
@@ -294,10 +318,10 @@ class MainWindow(QMainWindow):
             try:
                 self.proximity_comm.instrument.serial.close()  # 关闭串口连接
                 self.proximity_comm = None  # 清空通信对象
-                self.proximity_controller = None  # 清空控制器对象
+                self.proximity_controller = None  # 清控制器对象
                 self.ui.label_message.setText("接近开关串口连接已断开")  # 显示断开信息
             except Exception as e:
-                self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误信息
+                self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误息
 
     def open_penetration_motor_connection(self):
         """打开贯入电机的串口连接"""
@@ -319,7 +343,7 @@ class MainWindow(QMainWindow):
                 self.penetration_motor_controller = None  # 清空控制器对象
                 self.ui.label_message.setText("贯入电机串口连接已断开")  # 显示断开信息
             except Exception as e:
-                self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误信息
+                self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错��信息
 
     def monitor_proximity_switch(self):
         """监控接近开关状态"""
@@ -341,7 +365,7 @@ class MainWindow(QMainWindow):
     def open_sensor_connection(self):
         """打开传感器的串口连接"""
         selected_port_info = self.ui.comboBox_sensor_2.currentText()  # 获取选中的串口信息
-        selected_port = selected_port_info.split(' - ')[0]  # 提取串口号
+        selected_port = selected_port_info.split(' - ')[0]  # 提取串口
         try:
             self.sensor_comm = SensorCommunication(selected_port)  # 创建传感器通信对象
             self.sensor_controller = SensorController(self.sensor_comm)  # 创建传感器控制器对象
@@ -355,7 +379,7 @@ class MainWindow(QMainWindow):
             try:
                 self.sensor_comm.instrument.serial.close()  # 关闭串口连接
                 self.sensor_comm = None  # 清空通信对象
-                self.sensor_controller = None  # 清空控制器对象
+                self.sensor_controller = None  # 清控制器对象
                 self.ui.label_message.setText("传感器串口连接已断开")  # 显示断开信息
             except Exception as e:
                 self.ui.label_message.setText(f"无法断开连接: {str(e)}")  # 显示错误信息
@@ -374,27 +398,35 @@ class MainWindow(QMainWindow):
 
                 self.cut_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
                 self.ui.label_message.setText("电机已设置为顺时针旋转到指定距离")  # 显示成功信息
+
+                if not self.data_timer_cut.isActive():
+                    self.data_timer_cut.timeout.connect(self.update_cut_motor_plot)
+                    self.data_timer_cut.start(20)
             else:
-                self.ui.label_message.setText("电机控制器未连接")  # 显示未连接信息
+                self.ui.label_message.setText("电机控制器未接")  # 显示未连接信息
         except ValueError as e:
             self.ui.label_message.setText(f"无效的输入: {str(e)}")  # 显示输入错误信息
         except Exception as e:
             self.ui.label_message.setText(f"无法设置电机: {str(e)}")  # 显示设置错误信息
 
     def anticlockwise_distance_cut_motor(self):
-        """设置电机逆时针旋转到指定距离"""
+        """置电机逆时针旋转到指定距离"""
         try:
             if self.cut_motor_controller:
                 self.cut_motor_controller.set_servo_mode(2)  # 设置伺服模式为2
-                speed_value = float(self.ui.lineEdit_speed_cut_motor.text())  # 获取速度值
+                speed_value = float(self.ui.lineEdit_speed_cut_motor.text())  # 获取度值
                 distance_value = float(self.ui.lineEdit_distance_cut_motor.text())  # 获取距离值
 
                 speed_rpm = speed_value * 850 / 6  # 计算速度RPM
                 target_position = -int(distance_value * 37400 / 360)  # 计算目标位置，设为负数
                 position_type = 1  # 相对位置
 
-                self.cut_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
-                self.ui.label_message.setText("电机已设置为逆时针旋转到指定距离")  # 显示成功信息
+                self.cut_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 置位置控制
+                self.ui.label_message.setText("电机已设置为逆针旋转到指定距离")  # 显示成功信息
+
+                if not self.data_timer_cut.isActive():
+                    self.data_timer_cut.timeout.connect(self.update_cut_motor_plot)
+                    self.data_timer_cut.start(20)
             else:
                 self.ui.label_message.setText("电机控制器未连接")  # 显示未连接信息
         except ValueError as e:
@@ -448,7 +480,7 @@ class MainWindow(QMainWindow):
     def start_getting_cut_encoder_data(self):
         """开始获取剪切电机编码器数据"""
         if not self.data_timer_cut.isActive():
-            self.data_timer_cut.start(20)  # 每20毫秒更新一次数据
+            self.data_timer_cut.start(20)  # 每50毫秒更新一次数据，尽可能快地获取数据
 
     def stop_getting_cut_encoder_data(self):
         """停止获取编码器数据"""
@@ -481,9 +513,9 @@ class MainWindow(QMainWindow):
                 self.penetration_motor_controller.set_speed(0)  # 设置速度为0，停止电机
                 self.ui.label_message.setText("贯入电机已停止")  # 显示停止信息
             else:
-                self.ui.label_message.setText("贯入电机控制器未连接")  # 显示未连接信息
+                self.ui.label_message.setText("贯入电机��制器未连接")  # 显示未连接信息
         except Exception as e:
-            self.ui.label_message.setText(f"无法停止贯入电机: {str(e)}")  # 显示停止错误信息
+            self.ui.label_message.setText(f"无法停止贯入电机: {str(e)}")  # 显示停止误信息
 
     def up_sustain_penetration_motor(self):
         """设置贯入电机持续上升"""
@@ -497,7 +529,7 @@ class MainWindow(QMainWindow):
                 speed_rpm = speed_value * 1020  # 计算速度RPM
 
                 self.penetration_motor_controller.set_speed(speed_rpm)  # 设置电机速度
-                self.ui.label_message.setText("贯入电机已设置为持续上升")  # 显示成功信息
+                self.ui.label_message.setText("贯入电机已置为持上升")  # 显示成功信息
 
                 # 监控接近开关状态
                 while True:
@@ -544,8 +576,12 @@ class MainWindow(QMainWindow):
 
                 self.penetration_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
                 self.ui.label_message.setText("贯入电机已设置为上升到指定距离")  # 显示成功信息
+
+                if not self.data_timer_penetration.isActive():
+                    self.data_timer_penetration.timeout.connect(self.update_penetration_motor_plot)
+                    self.data_timer_penetration.start(20)
             else:
-                self.ui.label_message.setText("贯入电机控制器未连接")  # 显示未连接信息
+                self.ui.label_message.setText("贯入���机控制器未连接")  # 显示未连接信息
         except ValueError as e:
             self.ui.label_message.setText(f"无效的输入: {str(e)}")  # 显示输入错误信息
         except Exception as e:
@@ -565,22 +601,24 @@ class MainWindow(QMainWindow):
 
                 self.penetration_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
                 self.ui.label_message.setText("贯入电机已设置为下降到指定距离")  # 显示成功信息
+
+                if not self.data_timer_penetration.isActive():
+                    self.data_timer_penetration.timeout.connect(self.update_penetration_motor_plot)
+                    self.data_timer_penetration.start(20)
             else:
                 self.ui.label_message.setText("贯入电机控制器未连接")  # 显示未连接信息
         except ValueError as e:
-            self.ui.label_message.setText(f"无效���输入: {str(e)}")  # 显示输入错误信息
+            self.ui.label_message.setText(f"无效的输入: {str(e)}")  # 显示输入错误信息
         except Exception as e:
             self.ui.label_message.setText(f"无法设置贯入电机: {str(e)}")  # 显示设置错误信息
 
     def start_getting_penetration_encoder_data(self):
-        """开始获取贯入电机编码器数据"""
-        if not self.data_timer_penetration.isActive():
-            self.data_timer_penetration.start(20)  # 每20毫秒更新一次数据
+        """开获取贯入电机编码器数据"""
+        self.penetration_motor_thread.start()
 
     def stop_getting_penetration_encoder_data(self):
         """停止获取贯入电机编码器数据"""
-        if self.data_timer_penetration.isActive():
-            self.data_timer_penetration.stop()
+        self.penetration_motor_thread.stop()
 
     def get_penetration_encoder_data(self):
         """获取贯入电机的编码器数据"""
@@ -588,7 +626,7 @@ class MainWindow(QMainWindow):
             # 假设这里是获取编码器数据的逻辑
             encoder_data = self.penetration_motor_controller.get_encoder_pulses()  # 从控制器获取编码器脉冲数据
                         
-            return encoder_data  # 返回获取的编码器数据
+            return encoder_data  # 返回获取的编码器��据
         except Exception as e:
             print(f"获取编码器数据时出错: {str(e)}")  # 打印错误信息
             return None  # 返回None以指示出错
@@ -669,7 +707,7 @@ class MainWindow(QMainWindow):
             self.cut_motor_data_points.append((x, y, current_time))
 
             # 控制绘图更新频率
-            if time.time() - self.last_plot_time >= self.plot_update_interval / 500.0:  # 转换为秒
+            if time.time() - self.last_plot_time >= self.plot_update_interval / 1000.0:  # 转换为秒
                 self.last_plot_time = time.time()  # 更新上次绘图时间
 
                 # 更新散点图（只显示x和y）
@@ -724,7 +762,7 @@ class MainWindow(QMainWindow):
             x = 0  # 默认值为0
             if encoder_pulses is not None:  # 确保数据有效
                 # 计算数据点坐标
-                x = float(encoder_pulses / 544)  # 下降距离（mm）作为X轴数据
+                x = float(encoder_pulses / 544)  # 下降距离（）作为X轴数据
             y = float(pulling_pressure)  # 拉压力作为Y轴数据
             # 计算当前时间戳（毫秒）
             current_time = (time.time() - self.start_time_penetration) * 1000  
@@ -733,7 +771,7 @@ class MainWindow(QMainWindow):
             self.penetration_motor_data_points.append((x, y, current_time))
 
             # 控制绘图更新频率
-            if time.time() - self.last_plot_time >= self.plot_update_interval / 500.0:  # 转换为秒
+            if time.time() - self.last_plot_time >= self.plot_update_interval / 1000.0:  # 转换为秒
                 self.last_plot_time = time.time()  # 更新上次绘图时间
 
                 # 更新散点图（只显示x和y）
@@ -792,7 +830,7 @@ class MainWindow(QMainWindow):
                 QFileDialog.ShowDirsOnly
             )
             
-            # 如果用户选择了文件夹（没有点击取消）
+            # 如果用户选择了文件夹（没有点击取消
             if folder_path:
                 # 更新label显示
                 self.ui.label_folder_cut_motor.setText(folder_path)
@@ -821,7 +859,7 @@ class MainWindow(QMainWindow):
                 QFileDialog.ShowDirsOnly
             )
             
-            # 如果用户选择了文件夹（没有点击取消）
+            # 如果用户选择了文件夹（没有点击取消
             if folder_path:
                 # 更新label显示
                 self.ui.label_folder_penetration_motor.setText(folder_path)
@@ -880,7 +918,7 @@ class MainWindow(QMainWindow):
 
     def save_data_penetration_motor(self):
         """
-        保存贯入电机图表数据到Excel文件
+        保存剪切电机图表数据到Excel文件
         
         功能：
             - 获取图表中所有数据点
@@ -936,12 +974,19 @@ class MainWindow(QMainWindow):
         self.ui.label_message_cut_motor.setText("Reset figure")  # 更新状态信息
 
     def reset_figure_penetration_motor(self):
-        """清空贯入电机图表"""
+        """清空剪切电机图表"""
         self.penetration_motor_series.clear()  # 清空散点图系列
         self.penetration_motor_data_points.clear()  # 清空数据点列表
         # self.cut_motor_chart.axisX().setRange(0, 1)  # 重置X轴范围
         # self.cut_motor_chart.axisY().setRange(0, 1)  # 重置Y轴范围
         self.ui.label_message_penetration_motor.setText("Reset figure")  # 更新状态信息
+
+    def start_getting_sensor_data(self):
+        """开始获取传感器数据"""
+        if not self.data_timer_cut.isActive():
+            self.data_timer_cut.timeout.connect(self.get_sensor_data)  # 连接到 get_sensor_data
+            self.data_timer_penetration.timeout.connect(self.get_sensor_data)
+            self.data_timer_cut.start(10)  # 每50毫秒更新一次数据，尽可能快地获取数据
 
     def get_sensor_data(self):
         """获取传感器数据并显示"""
