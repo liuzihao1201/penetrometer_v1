@@ -244,6 +244,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 255, 127);</string>
+    </property>
     <property name="text">
      <string>下降</string>
     </property>
@@ -271,7 +274,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>7</string>
+     <string>1</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -414,8 +417,7 @@ background-color: rgb(255, 255, 127);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置贯入零点</string>
@@ -448,7 +450,7 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QPushButton" name="pushButton_select_folder_penetration_motor">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>110</y>
       <width>81</width>
       <height>23</height>
@@ -461,9 +463,9 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QLineEdit" name="lineEdit_file_name_penetration_motor_">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>200</x>
       <y>110</y>
-      <width>61</width>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
@@ -477,7 +479,7 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>110</y>
       <width>61</width>
       <height>23</height>
@@ -498,14 +500,14 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QPushButton" name="pushButton_save_data_penetration_motor">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>260</x>
       <y>110</y>
       <width>81</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>保存当前图表</string>
+     <string>保存图表</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_reset_figure_penetration_motor">
@@ -513,13 +515,12 @@ background-color: rgb(255, 255, 127);</string>
      <rect>
       <x>260</x>
       <y>80</y>
-      <width>61</width>
+      <width>81</width>
       <height>23</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置图表</string>
@@ -535,11 +536,26 @@ background-color: rgb(255, 255, 127);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
-     <string>重置贯入传感器</string>
+     <string>重置拉压力</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_limit_pressure">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>10</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
   </widget>
@@ -603,6 +619,9 @@ background-color: rgb(255, 255, 127);</string>
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 255, 127);</string>
+    </property>
     <property name="text">
      <string>顺时针</string>
     </property>
@@ -617,7 +636,7 @@ background-color: rgb(255, 255, 127);</string>
      </rect>
     </property>
     <property name="text">
-     <string>3</string>
+     <string>1</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -760,8 +779,7 @@ background-color: rgb(255, 255, 127);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置剪切零点</string>
@@ -770,9 +788,9 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QLineEdit" name="lineEdit_file_name_cut_motor">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>200</x>
       <y>110</y>
-      <width>61</width>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
@@ -786,7 +804,7 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QPushButton" name="pushButton_select_folder_cut_motor">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>110</y>
       <width>81</width>
       <height>23</height>
@@ -799,20 +817,20 @@ background-color: rgb(255, 255, 127);</string>
    <widget class="QPushButton" name="pushButton_save_data_cut_motor">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>260</x>
       <y>110</y>
       <width>81</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>保存当前图表</string>
+     <string>保存图表</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>110</y>
       <width>61</width>
       <height>23</height>
@@ -859,13 +877,12 @@ background-color: rgb(255, 255, 127);</string>
      <rect>
       <x>260</x>
       <y>80</y>
-      <width>61</width>
+      <width>81</width>
       <height>23</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
      <string>重置图表</string>
@@ -881,11 +898,26 @@ background-color: rgb(255, 255, 127);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 0, 0);
-background-color: rgb(255, 255, 127);</string>
+     <string notr="true">background-color: rgb(255, 255, 127);</string>
     </property>
     <property name="text">
-     <string>重置剪切传感器</string>
+     <string>重置扭矩</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_limit_torque">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>2</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
   </widget>

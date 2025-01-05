@@ -100,8 +100,7 @@ class MainWindow(QMainWindow):
         self.sensor_comm = None  # 传感器通信对象
 
         # 数据获取定时器
-        self.data_timer_cut = QTimer(self)
-        # self.data_timer_cut.timeout.connect(self.get_cut_encoder_data)
+        self.data_timer_cut = QTimer(self)  # 用于剪切电机
         self.data_timer_cut.timeout.connect(self.update_cut_motor_plot)
 
         self.data_timer_penetration = QTimer(self)  # 用于贯入电机
@@ -115,6 +114,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_clockwise_distance_cut_motor.clicked.connect(self.clockwise_distance_cut_motor)  # 顺时针旋转到指定距离
         self.ui.pushButton_anticlockwise_distance_cut_motor.clicked.connect(self.anticlockwise_distance_cut_motor)  # 逆时针旋转到指定距离
         self.ui.pushButton_stop_cut_motor.clicked.connect(self.stop_cut_motor)  # 停止电机
+        self.ui.pushButton_reset_cut_motor.clicked.connect(self.reset_cut_motor)  # 重置剪切电机
         self.ui.pushButton_clockwise_sustain_cut_motor.clicked.connect(self.clockwise_sustain_cut_motor)  # 顺时针持续旋转
         self.ui.pushButton_anticlockwise_sustain_cut_motor.clicked.connect(self.anticlockwise_sustain_cut_motor)  # 逆时针持续旋转
         self.ui.pushButton_stop_penetration_motor.clicked.connect(self.stop_penetration_motor)  # 停止贯入电机
@@ -133,7 +133,9 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_reset_figure_penetration_motor.clicked.connect(self.reset_figure_penetration_motor)
         self.ui.pushButton_reset_data_penetration_sensor.clicked.connect(self.reset_data_penetration_sensor)
         self.ui.pushButton_reset_data_cut_sensor.clicked.connect(self.reset_data_cut_sensor)
-
+        self.ui.pushButton_get_data_cut_motor.clicked.connect(self.start_getting_cut_encoder_data)  # 开始获取贯入电机编码器数据
+        self.ui.pushButton_stop_data_cut_motor.clicked.connect(self.stop_getting_cut_encoder_data)  # 停止获取贯入电机编码器数据
+        
         # 连接刷新按钮点击事件到刷新方法
         self.ui.pushButton_refresh_com.clicked.connect(self.refresh_serial_ports)  # 刷新串口信息
 
@@ -406,8 +408,25 @@ class MainWindow(QMainWindow):
         """停止电机"""
         try:
             if self.cut_motor_controller:
-                self.cut_motor_controller.set_speed(0)  # 设置速度为0，停止电机
+                self.cut_motor_controller.set_speed(0)  # 设置速度为0，停止电机 
                 self.ui.label_message.setText("电机已停止")  # 显示停止信息
+            else:
+
+                self.ui.label_message.setText("电机控制器未连接")  # 显示未连接信息
+        except Exception as e:
+            self.ui.label_message.setText(f"无法停止电机: {str(e)}")  # 显示停止错误信息
+
+    def reset_cut_motor(self):
+        """重置电机"""
+        try:
+            if self.cut_motor_controller:
+                self.cut_motor_controller.set_servo_mode(2)  # 设置伺服模式为2
+                speed_rpm = int(1 * 850 / 6)  # 计算速度RPM
+                target_position = int(0)  # 计算目标位置
+                position_type = 0  # 绝对位置
+
+                self.cut_motor_controller.set_position_control(speed_rpm, position_type, target_position)  # 设置位置控制
+                self.ui.label_message.setText("电机已回归零点")  # 显示成功信息
             else:
                 self.ui.label_message.setText("电机控制器未连接")  # 显示未连接信息
         except Exception as e:
@@ -581,6 +600,16 @@ class MainWindow(QMainWindow):
         """停止获取贯入电机编码器数据"""
         if self.data_timer_penetration.isActive():
             self.data_timer_penetration.stop()
+                
+    def start_getting_cut_encoder_data(self):
+        """开始获取贯入电机编码器数据"""
+        if not self.data_timer_cut.isActive():
+            self.data_timer_cut.start(20)  # 每20毫秒更新一次数据
+
+    def stop_getting_cut_encoder_data(self):
+        """停止获取贯入电机编码器数据"""
+        if self.data_timer_cut.isActive():
+            self.data_timer_cut.stop()
 
     def get_penetration_encoder_data(self):
         """获取贯入电机的编码器数据"""
@@ -658,6 +687,9 @@ class MainWindow(QMainWindow):
         try:
             encoder_pulses = self.get_cut_encoder_data()
             pulling_pressure, torque = self.get_sensor_data()  # 使用相同的方式获取传感器数据
+            #  如果拉压力大于，停止贯入运动
+            if float(abs(torque)) > float(self.ui.lineEdit_limit_torque.text()):
+                self.stop_cut_motor()
             x = 0  # 默认值为0
             if encoder_pulses is not None:
                 # 计算数据点坐标
@@ -720,11 +752,15 @@ class MainWindow(QMainWindow):
             encoder_pulses = self.get_penetration_encoder_data()  
             # 获取传感器数据，包括拉压力和扭矩
             pulling_pressure, torque = self.get_sensor_data()  
+            #  如果拉压力大于，停止贯入运动
+            if float(abs(pulling_pressure)) > float(self.ui.lineEdit_limit_pressure.text()):
+                self.stop_penetration_motor()
             
             x = 0  # 默认值为0
             if encoder_pulses is not None:  # 确保数据有效
                 # 计算数据点坐标
                 x = float(encoder_pulses / 544)  # 下降距离（mm）作为X轴数据
+                x = -x  #  改变x正负
             y = float(pulling_pressure)  # 拉压力作为Y轴数据
             # 计算当前时间戳（毫秒）
             current_time = (time.time() - self.start_time_penetration) * 1000  
@@ -864,9 +900,9 @@ class MainWindow(QMainWindow):
             
             # 准备数据，现在使用存储的时间戳
             data = {
-                '剪切电机位置': [point[0] for point in self.cut_motor_data_points],
-                '编码器数据': [point[1] for point in self.cut_motor_data_points],
-                '时间戳(ms)': [point[2] for point in self.cut_motor_data_points]  # 使用存储的时间戳
+                '剪切电机位置/degree': [point[0] for point in self.cut_motor_data_points],
+                '扭矩/n*m': [point[1] for point in self.cut_motor_data_points],
+                '时间戳/ms': [point[2] for point in self.cut_motor_data_points]  # 使用存储的时间戳
             }
             
             # 创建DataFrame并保存
@@ -913,9 +949,9 @@ class MainWindow(QMainWindow):
             
             # 准备数据，现在使用存储的时间戳
             data = {
-                '贯入电机位置': [point[0] for point in self.penetration_motor_data_points],
-                '拉压力': [point[1] for point in self.penetration_motor_data_points],
-                '时间戳(ms)': [point[2] for point in self.penetration_motor_data_points]  # 使用存储的时间戳
+                '贯入电机位置/mm': [point[0] for point in self.penetration_motor_data_points],
+                '拉压力/n': [point[1] for point in self.penetration_motor_data_points],
+                '时间戳/ms': [point[2] for point in self.penetration_motor_data_points]  # 使用存储的时间戳
             }
             
             # 创建DataFrame并保存
@@ -979,7 +1015,7 @@ def main():
     app = QApplication([])
     window = MainWindow()
     window.show()
-    window.setWindowTitle("TTL-V1.0")
+    window.setWindowTitle("TTI-V1.0")
     window.setWindowIcon(QIcon('jlu.png'))
     app.exec()
 

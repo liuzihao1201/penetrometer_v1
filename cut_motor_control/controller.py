@@ -97,9 +97,17 @@ class CutMotorController:
         return pulses
 
     def reset_data(self):
-        """重置切割电机数据"""
+        """重置剪切电机数据"""
         try:
             self.comm.write_register(self.REGISTERS['reset_data'], 1, functioncode=6)  # 写入寄存器以清零数据
             print("切割电机数据已重置")
         except Exception as e:
             print(f"无法重置切割电机数据: {str(e)}")
+
+    def reset_cut(self):
+        """重置剪切电机数据"""
+        try:
+            self.comm.write_register(self.REGISTERS['reset_data'], 1, functioncode=6)  # 写入寄存器以清零数据
+            print("贯入电机数据已重置")
+        except Exception as e:
+            print(f"无法重置贯入电机数据: {str(e)}")
